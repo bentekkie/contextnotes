@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 
@@ -12,6 +13,9 @@ import (
 )
 
 func main() {
+	modelFlag := flag.String("model", "gemini-1.5-flash", "The Gemini model to use")
+	flag.Parse()
+
 	ctx := context.Background()
 
 	// Initialize the LRU cache (size 100)
@@ -32,7 +36,7 @@ func main() {
 
 	s := server.NewMCPServer("faq-cache", "1.0.0")
 
-	RegisterTools(s, cache, client)
+	RegisterTools(s, cache, client, *modelFlag)
 
 	stdioServer := server.NewStdioServer(s)
 	if err := stdioServer.Listen(context.Background(), os.Stdin, os.Stdout); err != nil {

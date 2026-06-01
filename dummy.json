@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "faq-cache": {
+      "command": "go",
+      "args": ["run", "main.go", "cache.go", "--model=gemini-1.5-flash"]
+    }
+  }
+}

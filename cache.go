@@ -34,7 +34,7 @@ func getFileDigest(fp string) (string, error) {
 	return getDigestFromBytes(content), nil
 }
 
-func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string], client *genai.Client) {
+func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string], client *genai.Client, modelName string) {
 	askFaqTool := mcp.NewTool("ask_faq",
 		mcp.WithDescription("Ask a FAQ about a specific file. The cache will return an existing answer if one exists, otherwise it will generate a new one using Gemini and save it."),
 		mcp.WithString("filepath",
@@ -75,7 +75,7 @@ func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string], clie
 			}
 		}
 
-		model := client.GenerativeModel("gemini-1.5-flash")
+		model := client.GenerativeModel(modelName)
 
 		// 3. Check for semantic matches if there are any existing cached questions
 		if len(existingQuestions) > 0 {
