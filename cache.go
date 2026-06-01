@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -32,7 +33,7 @@ func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string]) {
 	)
 
 	s.AddTool(addFaqTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		filepath, err := request.RequireString("filepath")
+		fp, err := request.RequireString("filepath")
 		if err != nil {
 			return mcp.NewToolResultError("filepath must be a string"), nil
 		}
@@ -45,10 +46,10 @@ func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string]) {
 			return mcp.NewToolResultError("answer must be a string"), nil
 		}
 
-		key := CacheKey{Filepath: filepath, Question: question}
+		key := CacheKey{Filepath: filepath.Clean(fp), Question: question}
 		cache.Add(key, answer)
 
-		return mcp.NewToolResultText(fmt.Sprintf("Added FAQ for %s: %s", filepath, question)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Added FAQ for %s: %s", fp, question)), nil
 	})
 
 	getFaqTool := mcp.NewTool("get_faq",
@@ -64,7 +65,7 @@ func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string]) {
 	)
 
 	s.AddTool(getFaqTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		filepath, err := request.RequireString("filepath")
+		fp, err := request.RequireString("filepath")
 		if err != nil {
 			return mcp.NewToolResultError("filepath must be a string"), nil
 		}
@@ -73,12 +74,12 @@ func RegisterTools(s *server.MCPServer, cache *lru.Cache[CacheKey, string]) {
 			return mcp.NewToolResultError("question must be a string"), nil
 		}
 
-		key := CacheKey{Filepath: filepath, Question: question}
+		key := CacheKey{Filepath: filepath.Clean(fp), Question: question}
 		if answer, ok := cache.Get(key); ok {
 			return mcp.NewToolResultText(answer), nil
 		}
 
-		return mcp.NewToolResultError(fmt.Sprintf("FAQ not found for %s: %s", filepath, question)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("FAQ not found for %s: %s", fp, question)), nil
 	})
 
 	clearCacheTool := mcp.NewTool("clear_faq_cache",
