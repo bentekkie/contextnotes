@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	modelFlag := flag.String("model", "gemini-1.5-flash", "The Gemini model to use")
+	modelFlag := flag.String("model", "gemini-pro", "The Gemini model to use")
 	flag.Parse()
 
 	ctx := context.Background()
